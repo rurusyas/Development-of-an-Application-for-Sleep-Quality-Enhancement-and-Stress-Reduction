@@ -118,9 +118,9 @@ export default function Focus() {
                 </defs>
               </svg>
               <div className="c">
-                <div>
-                  <b className="mono">{fmtMMSS(remaining)}</b>
-                  <span>{state === "paused" ? "пауза" : state === "completed" ? "готово" : "осталось"}</span>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                  <div className="mono" style={{ fontSize: 28, fontWeight: 800, color: "var(--text)", letterSpacing: "-0.01em", lineHeight: 1 }}>{fmtMMSS(remaining)}</div>
+                  <div className="muted" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: ".16em" }}>{state === "paused" ? "пауза" : state === "completed" ? "готово" : "осталось"}</div>
                 </div>
               </div>
             </div>

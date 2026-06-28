@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "./icons";
+import { isNative, isTelegram } from "../lib/platform";
 
 export function StatusBar({ time = "9:41" }: { time?: string }) {
+  if (isNative() || isTelegram()) return null;
   return (
     <div className="statusbar">
       <span>{time}</span>

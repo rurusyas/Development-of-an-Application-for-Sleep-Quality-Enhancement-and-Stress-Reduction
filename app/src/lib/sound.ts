@@ -105,16 +105,15 @@ export function createSoundEngine() {
     return buf;
   }
 
-  function play(def: SoundDef, volume = 0.6) {
+  async function play(def: SoundDef, volume = 0.6) {
     const c = ensure();
-    if (c.state === "suspended") c.resume();
+    if (c.state !== "running") { try { await c.resume(); } catch {} }
     stopNodes();
     const p = def.params as any;
 
     if (def.type === "audio" && p.url) {
       const el = new Audio(String(p.url));
       el.loop = true;
-      el.crossOrigin = "anonymous";
       el.preload = "auto";
       try {
         const src = c.createMediaElementSource(el);
