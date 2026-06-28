@@ -2,20 +2,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppI
 from telegram.ext import CommandHandler, ContextTypes, MessageHandler, filters
 
 from config import MINIAPP_URL
+from keyboards.menu import _valid_https
 from services import orca_voice
-
-
-# id -> (emoji, friendly description)
-_SOUND_META = {
-    "white-noise":  ("⚪️", "ровный, маскирует шум комнаты"),
-    "pink-noise":   ("🌸", "мягче белого, многие лучше засыпают под него"),
-    "brown-noise":  ("🟤", "глубокий низкий шум, эффект «гудит океан»"),
-    "ocean-waves":  ("🌊", "медленные накатывающие волны"),
-    "rain":         ("🌧",  "плотный дождь по крыше"),
-    "crackle":      ("🔥",  "треск костра, негромкий и тёплый"),
-    "night-drone":  ("🌌",  "ночной гул — как будто город спит"),
-    "fan":          ("💨",  "вентилятор: ровный, чуть колеблется"),
-}
 
 
 async def sounds(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -26,11 +14,17 @@ async def sounds(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
 
     markup = None
-    if MINIAPP_URL:
-        markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("Открыть Orca", web_app=WebAppInfo(url=MINIAPP_URL))]]
-        )
-    await update.message.reply_text(text, parse_mode="HTML", reply_markup=markup)
+    if _valid_https(MINIAPP_URL):
+        try:
+            markup = InlineKeyboardMarkup(
+                [[InlineKeyboardButton("Открыть Orca", web_app=WebAppInfo(url=MINIAPP_URL))]]
+            )
+        except Exception:
+            markup = None
+    try:
+        await update.message.reply_text(text, parse_mode="HTML", reply_markup=markup)
+    except Exception:
+        await update.message.reply_text(text)
 
 
 def get_handlers():

@@ -27,6 +27,12 @@ BOOT_VERSION = "v4-2026-06-28-concurrent-waitfor-localfallback-errorhandler"
 async def post_init(application):
     application.bot_data["api"] = ApiClient(API_BASE)
     print(f"[BOOT] {datetime.utcnow().isoformat()} VERSION={BOOT_VERSION} API_BASE={API_BASE}", file=sys.stderr, flush=True)
+    # Pre-flight: delete any pre-existing webhook, drop pending updates so old polling sessions terminate cleanly
+    try:
+        await application.bot.delete_webhook(drop_pending_updates=True)
+        print(f"[BOOT] delete_webhook(drop_pending_updates=True) OK", file=sys.stderr, flush=True)
+    except Exception as e:
+        print(f"[BOOT] delete_webhook failed: {e!r}", file=sys.stderr, flush=True)
 
 
 async def post_shutdown(application):
@@ -90,7 +96,7 @@ def main():
     for h in help_handler.get_handlers():
         app.add_handler(h)
 
-    app.run_polling()
+    app.run_polling(drop_pending_updates=True)
 
 
 if __name__ == "__main__":
