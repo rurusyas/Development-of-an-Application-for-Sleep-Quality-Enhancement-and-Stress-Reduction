@@ -62,5 +62,5 @@ export default function App({ demo = false }: { demo?: boolean }) {
     </div>
   );
 
-  return <HashRouter>{demo ? <div className="stage"><div className="device">{inner}</div></div> : inner}</HashRouter>;
+  return <HashRouter>{demo ? <div className="stage"><div className="device-wrap"><div className="device">{inner}</div></div></div> : inner}</HashRouter>;
 }

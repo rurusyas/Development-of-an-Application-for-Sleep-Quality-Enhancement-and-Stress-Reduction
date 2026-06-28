@@ -1,25 +1,33 @@
+import asyncio
 import httpx
 
 
 class ApiClient:
     def __init__(self, base_url):
         self.base_url = base_url
-        self.client = httpx.AsyncClient(base_url=base_url, timeout=httpx.Timeout(30.0, connect=10.0))
+        self.client = httpx.AsyncClient(base_url=base_url, timeout=httpx.Timeout(15.0, connect=8.0))
 
     async def close(self):
         await self.client.aclose()
 
-    async def request(self, method, url, **kwargs):
-        try:
-            r = await self.client.request(method, url, **kwargs)
-            if r.status_code == 404:
-                return None
-            r.raise_for_status()
-            return r.json()
-        except Exception as e:
-            import sys
-            print(f"[api_client] {method} {url} failed: {e!r}", file=sys.stderr)
-            return None
+    async def request(self, method, url, retries=2, **kwargs):
+        last_err = None
+        for attempt in range(retries + 1):
+            try:
+                r = await self.client.request(method, url, **kwargs)
+                if r.status_code == 404:
+                    return None
+                r.raise_for_status()
+                return r.json()
+            except Exception as e:
+                last_err = e
+                import sys
+                print(f"[api_client] {method} {url} attempt {attempt+1}/{retries+1} failed: {e!r}", file=sys.stderr)
+                if attempt < retries:
+                    await asyncio.sleep(0.5 * (attempt + 1))
+        import sys
+        print(f"[api_client] {method} {url} all retries exhausted, last: {last_err!r}", file=sys.stderr)
+        return None
 
     async def ensure_user(self, tg_id, name=None):
         user = await self.get_user(tg_id)

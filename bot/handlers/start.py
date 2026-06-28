@@ -62,10 +62,11 @@ WELCOME = (
     "<b>Привет. Я Orca.</b>\n"
     "Косатка, которая плавает рядом и помогает тебе со сном, стрессом и фокусом.\n\n"
     "<i>Сейчас короткий онбординг — 9 вопросов на пару минут. "
-    "Из ответов я посчитаю твои индексы Сна, Стресса и Фокуса.</i>\n\n"
+    "Из ответов я посчитаю твои индексы Сна, Стресса и Фокуса. "
+    "Их можно перепройти в любой момент командой /start.</i>\n\n"
     "<blockquote>"
-    "Цифры — это начальная точка, от которой "
-    "видно прогресс."
+    "Цифры — это не оценка тебя. Это начальная точка, от которой "
+    "видно прогресс. Орка не судит — Орка плывёт рядом."
     "</blockquote>"
 )
 
@@ -138,13 +139,26 @@ async def save_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if next_state >= len(questions):
         user = update.effective_user
         api = context.application.bot_data["api"]
-        await update.message.reply_text("Считаю индексы…")
-        data = await api.create_user(str(user.id), user.full_name, context.user_data["onboarding"])
+        try:
+            await update.message.reply_text("Считаю индексы…")
+        except Exception:
+            pass
+        data = None
+        try:
+            data = await api.create_user(str(user.id), user.full_name, context.user_data["onboarding"])
+        except Exception as e:
+            import sys, traceback
+            print(f"[start.save_answer] create_user crashed: {e!r}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
         if not data:
-            await update.message.reply_text(
-                "Не смог сохранить профиль. Проверь, что API Orca запущен.",
-                reply_markup=main_menu(),
-            )
+            try:
+                await update.message.reply_text(
+                    "Не смог сохранить профиль — попробуй ещё раз через минуту или нажми /reset для возврата в меню.",
+                    reply_markup=main_menu(),
+                )
+            except Exception:
+                pass
+            context.user_data.pop("onboarding_state", None)
             return ConversationHandler.END
         context.user_data["uid"] = data["id"]
         result = (
@@ -156,7 +170,15 @@ async def save_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"<i>{orca_voice.greeting()}</i>\n\n"
             "Дальше — кнопки в меню. Подсказка по командам — /help."
         )
-        await update.message.reply_text(result, parse_mode="HTML", reply_markup=main_menu())
+        try:
+            await update.message.reply_text(result, parse_mode="HTML", reply_markup=main_menu())
+        except Exception as e:
+            import sys
+            print(f"[start.save_answer] final reply failed: {e!r}", file=sys.stderr)
+            try:
+                await update.message.reply_text("Профиль создан. Главное меню ниже.", reply_markup=main_menu())
+            except Exception:
+                pass
         context.user_data.pop("onboarding", None)
         context.user_data.pop("onboarding_state", None)
         return ConversationHandler.END

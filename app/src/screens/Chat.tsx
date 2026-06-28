@@ -1,10 +1,32 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Page, StatusBar } from "../components/Shell";
 import { Orca } from "../components/icons";
 import { Icon } from "../components/icons";
 import { useStore } from "../store/useStore";
 import { api } from "../services/api";
 import { tg } from "../lib/telegram";
+
+function renderMd(text: string): ReactNode {
+  const lines = text.split("\n");
+  return lines.map((raw, li) => {
+    const cleaned = raw.replace(/^#+\s*/, "").replace(/^[-*]\s+/, "• ");
+    const parts: ReactNode[] = [];
+    const re = /\*\*([^*]+)\*\*|__([^_]+)__|\*([^*\n]+)\*|_([^_\n]+)_|`([^`\n]+)`/g;
+    let last = 0;
+    let m: RegExpExecArray | null;
+    let k = 0;
+    while ((m = re.exec(cleaned)) !== null) {
+      if (m.index > last) parts.push(cleaned.slice(last, m.index));
+      if (m[1] || m[2]) parts.push(<b key={k++}>{m[1] || m[2]}</b>);
+      else if (m[3] || m[4]) parts.push(<i key={k++}>{m[3] || m[4]}</i>);
+      else if (m[5]) parts.push(<code key={k++}>{m[5]}</code>);
+      last = m.index + m[0].length;
+    }
+    if (last < cleaned.length) parts.push(cleaned.slice(last));
+    if (!parts.length && !cleaned) return <div key={li} style={{ height: 6 }} />;
+    return <div key={li}>{parts.length ? parts : cleaned}</div>;
+  });
+}
 
 export default function Chat() {
   const chat = useStore((s) => s.chat);
@@ -55,7 +77,9 @@ export default function Chat() {
                 AI-чат пока не подключён к ключу LLM. На демо отвечу по-простому: задай вопрос — я перешлю в бэкенд, как только ключ появится.
               </div>
             ) : (
-              <div key={i} className={"bubble " + (m.role === "user" ? "me" : "ai")}>{m.content}</div>
+              <div key={i} className={"bubble " + (m.role === "user" ? "me" : "ai")} style={{ whiteSpace: "pre-wrap" }}>
+                {m.role === "assistant" ? renderMd(m.content) : m.content}
+              </div>
             )
           )}
           <div ref={bottom} />

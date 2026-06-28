@@ -30,6 +30,7 @@ export function createSoundEngine() {
   let ctx: AudioContext | null = null;
   let master: GainNode | null = null;
   let nodes: AudioScheduledSourceNode[] = [];
+  let mediaEls: HTMLAudioElement[] = [];
   let timer: number | null = null;
 
   function ensure() {
@@ -45,6 +46,8 @@ export function createSoundEngine() {
   function stopNodes() {
     nodes.forEach((n) => { try { n.stop(); } catch {} });
     nodes = [];
+    mediaEls.forEach((el) => { try { el.pause(); el.src = ""; } catch {} });
+    mediaEls = [];
   }
 
   function rainBuffer(ctx: AudioContext) {
@@ -107,6 +110,24 @@ export function createSoundEngine() {
     if (c.state === "suspended") c.resume();
     stopNodes();
     const p = def.params as any;
+
+    if (def.type === "audio" && p.url) {
+      const el = new Audio(String(p.url));
+      el.loop = true;
+      el.crossOrigin = "anonymous";
+      el.preload = "auto";
+      try {
+        const src = c.createMediaElementSource(el);
+        const g = c.createGain(); g.gain.value = Number(p.gain) || 0.7;
+        src.connect(g); g.connect(master!);
+      } catch {
+        el.volume = Math.min(1, Number(p.gain) || 0.7);
+      }
+      el.play().catch(() => {});
+      mediaEls.push(el);
+      fade(volume, 600);
+      return;
+    }
 
     if (def.type === "rain") {
       const bg = c.createBufferSource();

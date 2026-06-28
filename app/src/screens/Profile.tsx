@@ -4,7 +4,7 @@ import { Page, StatusBar } from "../components/Shell";
 import { Icon } from "../components/icons";
 import { useStore } from "../store/useStore";
 
-const TG_BOT = "orca_app_bot";
+const TG_BOT = "orca_sleep_bot";
 
 function initials(name: string) {
   return (name || "??").trim().split(/\s+/).map((w) => w[0]).join("").slice(0, 2).toUpperCase();

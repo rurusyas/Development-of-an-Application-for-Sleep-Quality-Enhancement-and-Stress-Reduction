@@ -36,6 +36,10 @@ def main():
         .build()
     )
 
+    # Global cancel/reset — runs BEFORE everything, force-resets any state
+    for h in cancel.get_handlers():
+        app.add_handler(h, group=-100)
+
     # Conversation handlers (multi-step)
     app.add_handler(start.get_handler())
     app.add_handler(diary.get_handler())
@@ -56,9 +60,6 @@ def main():
     for h in history.get_handlers():
         app.add_handler(h)
     for h in help_handler.get_handlers():
-        app.add_handler(h)
-
-    for h in cancel.get_handlers():
         app.add_handler(h)
 
     app.run_polling()
