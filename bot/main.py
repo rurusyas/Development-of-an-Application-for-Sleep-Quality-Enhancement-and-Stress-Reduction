@@ -28,9 +28,30 @@ async def post_init(application):
     application.bot_data["api"] = ApiClient(API_BASE)
     print(f"[BOOT] {datetime.utcnow().isoformat()} VERSION={BOOT_VERSION} API_BASE={API_BASE}", file=sys.stderr, flush=True)
     # Pre-flight: delete any pre-existing webhook, drop pending updates so old polling sessions terminate cleanly
+#    try:
+#        await application.bot.delete_webhook(drop_pending_updates=True)
+#        print(f"[BOOT] delete_webhook(drop_pending_updates=True) OK", file=sys.stderr, flush=True)
+#    except Exception as e:
+#        print(f"[BOOT] delete_webhook failed: {e!r}", file=sys.stderr, flush=True)
+    
+    import asyncio
+    for attempt in range(10):
+        try:
+            await application.bot.get_updates(offset=-1, timeout=0, limit=1)
+            print(f"[BOOT] getUpdates attempt {attempt+1}: OK (old poller dead)", file=sys.stderr, flush=True)
+            break
+        except Exception as e:
+            msg = str(e)
+            if "Conflict" in msg:
+                print(f"[BOOT] getUpdates attempt {attempt+1}: conflict, waiting...", file=sys.stderr, flush=True)
+                await asyncio.sleep(2)
+            else:
+                print(f"[BOOT] getUpdates attempt {attempt+1}: {e!r}", file=sys.stderr, flush=True)
+                break
+
     try:
         await application.bot.delete_webhook(drop_pending_updates=True)
-        print(f"[BOOT] delete_webhook(drop_pending_updates=True) OK", file=sys.stderr, flush=True)
+        print(f"[BOOT] delete_webhook OK", file=sys.stderr, flush=True)
     except Exception as e:
         print(f"[BOOT] delete_webhook failed: {e!r}", file=sys.stderr, flush=True)
 
