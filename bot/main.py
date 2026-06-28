@@ -1,4 +1,8 @@
-from telegram.ext import ApplicationBuilder
+import sys
+from datetime import datetime
+
+from telegram import Update
+from telegram.ext import ApplicationBuilder, ContextTypes
 from config import API_BASE, BOT_TOKEN
 from services.api_client import ApiClient
 from handlers import (
@@ -17,8 +21,12 @@ from handlers import (
 )
 
 
+BOOT_VERSION = "v4-2026-06-28-concurrent-waitfor-localfallback-errorhandler"
+
+
 async def post_init(application):
     application.bot_data["api"] = ApiClient(API_BASE)
+    print(f"[BOOT] {datetime.utcnow().isoformat()} VERSION={BOOT_VERSION} API_BASE={API_BASE}", file=sys.stderr, flush=True)
 
 
 async def post_shutdown(application):
@@ -27,7 +35,24 @@ async def post_shutdown(application):
         await api.close()
 
 
+async def on_error(update: object, context: ContextTypes.DEFAULT_TYPE):
+    import traceback
+    err = context.error
+    print(f"[ERROR_HANDLER] caught: {err!r}", file=sys.stderr, flush=True)
+    traceback.print_exception(type(err), err, err.__traceback__, file=sys.stderr)
+    try:
+        if isinstance(update, Update) and update.effective_message:
+            from keyboards.menu import main_menu
+            await update.effective_message.reply_text(
+                "Что-то пошло не так. Попробуй /reset или /start заново.",
+                reply_markup=main_menu(),
+            )
+    except Exception as e:
+        print(f"[ERROR_HANDLER] failed to notify user: {e!r}", file=sys.stderr, flush=True)
+
+
 def main():
+    print(f"[STARTUP] {datetime.utcnow().isoformat()} VERSION={BOOT_VERSION}", file=sys.stderr, flush=True)
     app = (
         ApplicationBuilder()
         .token(BOT_TOKEN)
@@ -36,6 +61,8 @@ def main():
         .post_shutdown(post_shutdown)
         .build()
     )
+
+    app.add_error_handler(on_error)
 
     # Global cancel/reset — runs BEFORE everything, force-resets any state
     for h in cancel.get_handlers():

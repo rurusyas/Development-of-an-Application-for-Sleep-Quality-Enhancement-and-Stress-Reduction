@@ -140,76 +140,76 @@ async def save_answer(update: Update, context: ContextTypes.DEFAULT_TYPE):
         import asyncio, sys, traceback
         user = update.effective_user
         api = context.application.bot_data["api"]
-        try:
-            await update.message.reply_text("Считаю индексы…")
-        except Exception:
-            pass
+        uid_log = user.id if user else "?"
+        print(f"[save_answer uid={uid_log}] entering final step", file=sys.stderr, flush=True)
 
-        # Strict timeout: 10 seconds max. If backend hangs, we tell the user immediately.
+        async def safe_reply(text, **kw):
+            try:
+                await asyncio.wait_for(update.message.reply_text(text, **kw), timeout=8.0)
+                print(f"[save_answer uid={uid_log}] reply OK ({text[:40]!r})", file=sys.stderr, flush=True)
+                return True
+            except Exception as e:
+                print(f"[save_answer uid={uid_log}] reply FAILED ({text[:40]!r}): {e!r}", file=sys.stderr, flush=True)
+                return False
+
+        await safe_reply("Считаю индексы…")
+
         data = None
         try:
+            print(f"[save_answer uid={uid_log}] calling api.create_user", file=sys.stderr, flush=True)
             data = await asyncio.wait_for(
                 api.create_user(str(user.id), user.full_name, context.user_data["onboarding"]),
-                timeout=10.0,
+                timeout=6.0,
             )
+            print(f"[save_answer uid={uid_log}] api.create_user returned: {bool(data)}", file=sys.stderr, flush=True)
         except asyncio.TimeoutError:
-            print("[start.save_answer] create_user timed out after 10s", file=sys.stderr)
+            print(f"[save_answer uid={uid_log}] api.create_user TIMEOUT after 6s", file=sys.stderr, flush=True)
         except Exception as e:
-            print(f"[start.save_answer] create_user crashed: {e!r}", file=sys.stderr)
+            print(f"[save_answer uid={uid_log}] api.create_user EXC: {e!r}", file=sys.stderr, flush=True)
             traceback.print_exc(file=sys.stderr)
 
-        if not data:
-            # Compute indices locally as a fallback so the user always gets a usable result
-            try:
-                from services.local_indices import compute_indices_local
-                idx = compute_indices_local(context.user_data["onboarding"])
-                fallback_msg = (
-                    "<b>Готово · профиль создан локально</b>\n\n"
-                    "Бэкенд сейчас не отвечает, индексы посчитал на стороне бота:\n"
-                    f"• Сон  <b>{idx['sleep_index']}</b>\n"
-                    f"• Стресс  <b>{idx['stress_index']}</b>\n"
-                    f"• Фокус  <b>{idx['focus_index']}</b>\n\n"
-                    "<i>Когда бэкенд оживёт — можно пройти онбординг снова через /start, тогда данные синхронизируются.</i>"
-                )
-                try:
-                    await update.message.reply_text(fallback_msg, parse_mode="HTML", reply_markup=main_menu())
-                except Exception:
-                    await update.message.reply_text(
-                        f"Сон {idx['sleep_index']} · Стресс {idx['stress_index']} · Фокус {idx['focus_index']}. Главное меню ниже.",
-                        reply_markup=main_menu(),
-                    )
-            except Exception as e:
-                print(f"[start.save_answer] local fallback failed: {e!r}", file=sys.stderr)
-                try:
-                    await update.message.reply_text(
-                        "Бэкенд не отвечает, и локально не вышло посчитать. Главное меню. Попробуй /start позже или /reset.",
-                        reply_markup=main_menu(),
-                    )
-                except Exception:
-                    pass
-            context.user_data.pop("onboarding_state", None)
-            return ConversationHandler.END
-
-        context.user_data["uid"] = data["id"]
-        result = (
-            "<b>Готово · профиль создан</b>\n\n"
-            f"Индексы Orca:\n"
-            f"• Сон  <b>{data.get('sleep_index')}</b>\n"
-            f"• Стресс  <b>{data.get('stress_index')}</b>\n"
-            f"• Фокус  <b>{data.get('focus_index')}</b>\n\n"
-            f"<i>{orca_voice.greeting()}</i>\n\n"
-            "Дальше — кнопки в меню. Подсказка по командам — /help."
-        )
+        # Compute local fallback ALWAYS (cheap), use it if backend failed
+        idx_local = None
         try:
-            await update.message.reply_text(result, parse_mode="HTML", reply_markup=main_menu())
+            from services.local_indices import compute_indices_local
+            idx_local = compute_indices_local(context.user_data["onboarding"])
+            print(f"[save_answer uid={uid_log}] local indices: {idx_local}", file=sys.stderr, flush=True)
         except Exception as e:
-            print(f"[start.save_answer] final reply failed: {e!r}", file=sys.stderr)
-            try:
-                await update.message.reply_text("Профиль создан. Главное меню ниже.", reply_markup=main_menu())
-            except Exception:
-                pass
+            print(f"[save_answer uid={uid_log}] local indices FAILED: {e!r}", file=sys.stderr, flush=True)
+            traceback.print_exc(file=sys.stderr)
+
+        if data:
+            context.user_data["uid"] = data["id"]
+            sleep_v = data.get("sleep_index")
+            stress_v = data.get("stress_index")
+            focus_v = data.get("focus_index")
+            note = ""
+        elif idx_local:
+            sleep_v = idx_local["sleep_index"]
+            stress_v = idx_local["stress_index"]
+            focus_v = idx_local["focus_index"]
+            note = " (локально — бэкенд не ответил вовремя)"
+        else:
+            sleep_v = stress_v = focus_v = "?"
+            note = " (расчёт не удался)"
+
+        # Plain text only, no HTML, no parse_mode — minimize failure surface
+        result_text = (
+            f"Готово, профиль создан{note}.\n\n"
+            f"Индексы Orca:\n"
+            f"Сон: {sleep_v}\n"
+            f"Стресс: {stress_v}\n"
+            f"Фокус: {focus_v}\n\n"
+            f"Меню кнопок ниже. /help — команды."
+        )
+        sent = await safe_reply(result_text, reply_markup=main_menu())
+        if not sent:
+            # last-ditch ultra-short message
+            await safe_reply("Профиль готов. Открой меню.", reply_markup=main_menu())
+
         context.user_data.pop("onboarding", None)
         context.user_data.pop("onboarding_state", None)
+        print(f"[save_answer uid={uid_log}] returning END", file=sys.stderr, flush=True)
         return ConversationHandler.END
 
     context.user_data["onboarding_state"] = next_state
