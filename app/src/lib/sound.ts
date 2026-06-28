@@ -39,7 +39,15 @@ export function createSoundEngine() {
       master = ctx.createGain();
       master.gain.value = 0;
       master.connect(ctx.destination);
+      try {
+        const b = ctx.createBuffer(1, 1, 22050);
+        const s = ctx.createBufferSource();
+        s.buffer = b;
+        s.connect(ctx.destination);
+        s.start(0);
+      } catch {}
     }
+    if (ctx.state !== "running") { try { ctx.resume(); } catch {} }
     return ctx!;
   }
 
@@ -105,9 +113,8 @@ export function createSoundEngine() {
     return buf;
   }
 
-  async function play(def: SoundDef, volume = 0.6) {
+  function play(def: SoundDef, volume = 0.6) {
     const c = ensure();
-    if (c.state !== "running") { try { await c.resume(); } catch {} }
     stopNodes();
     const p = def.params as any;
 
@@ -115,16 +122,9 @@ export function createSoundEngine() {
       const el = new Audio(String(p.url));
       el.loop = true;
       el.preload = "auto";
-      try {
-        const src = c.createMediaElementSource(el);
-        const g = c.createGain(); g.gain.value = Number(p.gain) || 0.7;
-        src.connect(g); g.connect(master!);
-      } catch {
-        el.volume = Math.min(1, Number(p.gain) || 0.7);
-      }
+      el.volume = Math.min(1, (Number(p.gain) || 0.7) * volume);
       el.play().catch(() => {});
       mediaEls.push(el);
-      fade(volume, 600);
       return;
     }
 
@@ -217,9 +217,27 @@ export function createSoundEngine() {
     master.gain.linearRampToValueAtTime(clampVolume(to), ctx.currentTime + ms / 1000);
   }
 
+  function setMediaVolume(v: number) {
+    mediaEls.forEach((el) => { try { el.volume = clampVolume(v); } catch {} });
+  }
+
+  function fadeMedia(to: number, ms: number) {
+    if (!mediaEls.length) return;
+    const steps = Math.max(1, Math.round(ms / 30));
+    const snap = mediaEls.map((el) => el.volume);
+    let i = 0;
+    const id = window.setInterval(() => {
+      i++;
+      const t = i / steps;
+      mediaEls.forEach((el, k) => { try { el.volume = clampVolume(snap[k] + (to - snap[k]) * t); } catch {} });
+      if (i >= steps) window.clearInterval(id);
+    }, 30);
+  }
+
   function stop(fadeMs = 800) {
     if (!ctx || !master) return;
     fade(0, fadeMs);
+    fadeMedia(0, fadeMs);
     if (timer) window.clearTimeout(timer);
     timer = window.setTimeout(() => stopNodes(), fadeMs + 50);
   }
@@ -229,5 +247,5 @@ export function createSoundEngine() {
     timer = window.setTimeout(() => stop(4000), seconds * 1000);
   }
 
-  return { play, stop, fade, timerStop, setVolume: (v: number) => fade(v, 300) };
+  return { play, stop, fade, timerStop, setVolume: (v: number) => { fade(v, 300); setMediaVolume(v); } };
 }

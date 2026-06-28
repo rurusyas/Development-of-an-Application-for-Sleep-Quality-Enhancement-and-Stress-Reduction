@@ -1,7 +1,11 @@
 import { parseSSE } from "../lib/sse";
 import type { ChatMsg } from "../store/useStore";
+import { isNative } from "../lib/platform";
 
 const BASE = (import.meta as any).env?.VITE_API_BASE || "http://localhost:8000";
+const UNREACHABLE_HINT = isNative() && /localhost|127\.0\.0\.1/.test(BASE)
+  ? "В iOS-сборке backend не настроен. Задай VITE_API_BASE и пересобери (см. app/.env.example)."
+  : "Сервер недоступен. Запусти бэкенд Orca, чтобы включить чат.";
 
 async function jsonOrNull(promise: Promise<Response>) {
   try {
@@ -39,7 +43,7 @@ export const api = {
         body: JSON.stringify({ message, history }),
       });
     } catch {
-      yield "Сервер недоступен. Запусти бэкенд Orca, чтобы включить чат.";
+      yield UNREACHABLE_HINT;
       return;
     }
     if (!res.body) { yield "Нет ответа от сервера."; return; }

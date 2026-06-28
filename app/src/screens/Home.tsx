@@ -59,7 +59,7 @@ export default function Home() {
         }}
       >
         <div style={{ position: "absolute", right: -20, top: -20, width: 130, height: 130, background: "radial-gradient(circle,rgba(34,211,238,.25),transparent 65%)" }} />
-        <span className="pill"><span className="dot" style={{ background: "var(--teal1)" }} />Фича-герой</span>
+        <span className="pill"><span className="dot" style={{ background: "var(--teal1)" }} />Здоровье</span>
         <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 12 }}>
           <div style={{ position: "relative", width: 64, height: 64, flex: "none" }}>
             <div className="ring a" style={{ inset: 0 }} />

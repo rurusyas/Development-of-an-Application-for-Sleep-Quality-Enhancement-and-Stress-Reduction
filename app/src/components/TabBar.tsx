@@ -1,7 +1,8 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Icon, Orca } from "./icons";
+import { isTelegram } from "../lib/platform";
 
-const tabs = [
+const baseTabs = [
   { to: "/", label: "Главная", icon: "home" },
   { to: "/sounds", label: "Сон", icon: "moon" },
   { to: "/diary", label: "Дневник", icon: "diary" },
@@ -9,9 +10,15 @@ const tabs = [
   { to: "/profile", label: "Профиль", icon: "user" },
 ];
 
+const webTabs = [
+  ...baseTabs,
+  { to: "/leaderboard", label: "Рейтинг", icon: "trophy" },
+];
+
 export default function TabBar() {
   const nav = useNavigate();
   const { pathname } = useLocation();
+  const tabs = isTelegram() ? baseTabs : webTabs;
   return (
     <nav className="tabbar">
       {tabs.map((t) => {

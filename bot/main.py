@@ -55,7 +55,6 @@ async def post_init(application):
     except Exception as e:
         print(f"[BOOT] delete_webhook failed: {e!r}", file=sys.stderr, flush=True)
 
-
 async def post_shutdown(application):
     api = application.bot_data.get("api")
     if api:
