@@ -1,0 +1,37 @@
+# секреты — НИКОГДА не коммитить
+.env
+*.env
+!.env.example
+bot/.env
+backend/.env
+
+# зависимости
+node_modules/
+app/node_modules/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# сборка
+dist/
+app/dist/
+build/
+
+# базы данных (создаются на сервере)
+*.db
+*.sqlite
+*.sqlite3
+orca.db
+
+# кэши и временное
+.pytest_cache/
+.mypy_cache/
+.DS_Store
+*.log
+.idea/
+.vscode/
+
+# Capacitor нативные сборки
+app/ios/
+app/android/

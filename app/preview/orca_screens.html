@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Orca — UI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --abyss:#04061a; --navy0:#0A0E27; --navy1:#101744;
+  --ocean0:#1E3A8A; --ocean1:#2563EB;
+  --teal0:#06B6D4; --teal1:#22D3EE; --lav:#818CF8; --ice:#E0F2FE;
+  --text:#E9EDFF; --muted:rgba(233,237,255,.55); --faint:rgba(233,237,255,.32);
+  --glass:rgba(255,255,255,.055); --brd:rgba(255,255,255,.12);
+  --good:#34D399; --warn:#FBBF24; --bad:#FB7185;
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:
+  radial-gradient(1200px 800px at 15% -5%, #0b1140 0%, transparent 55%),
+  radial-gradient(1000px 700px at 95% 10%, #11204e 0%, transparent 50%),
+  var(--abyss);
+  color:var(--text);font-family:var(--font);-webkit-font-smoothing:antialiased}
+.page{max-width:1320px;margin:0 auto;padding:56px 28px 96px}
+.page h1{font-size:13px;font-weight:600;letter-spacing:.32em;text-transform:uppercase;color:var(--teal1);opacity:.85}
+.page .lede{margin-top:10px;color:var(--muted);font-size:14px;max-width:640px;line-height:1.5}
+.gallery{margin-top:48px;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:52px 36px;justify-items:center}
+figure{display:flex;flex-direction:column;align-items:center;gap:14px}
+figcaption{font-size:12.5px;color:var(--faint);letter-spacing:.04em}
+figcaption b{color:var(--muted);font-weight:600}
+
+/* device */
+.phone{position:relative;width:300px;height:650px;border-radius:46px;
+  background:linear-gradient(180deg,#0c1230,#070a1f);
+  border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 0 0 7px #05070f, 0 0 0 8px rgba(255,255,255,.06), 0 40px 90px -40px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.06);
+  overflow:hidden}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:84px;height:22px;background:#000;border-radius:14px;z-index:30}
+.sb{position:absolute;top:0;left:0;right:0;height:42px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:12px;font-weight:600;z-index:20}
+.sb .r{display:flex;align-items:center;gap:5px}
+.sb svg{width:15px;height:11px;fill:var(--text)}
+.screen{position:absolute;inset:0;padding:48px 18px 78px;overflow:hidden;
+  background:
+   radial-gradient(420px 280px at 80% -8%, rgba(37,99,235,.30), transparent 60%),
+   radial-gradient(360px 300px at 0% 100%, rgba(6,182,212,.16), transparent 60%),
+   linear-gradient(180deg,var(--navy0),#070b22 70%,var(--abyss))}
+.stars{position:absolute;inset:0;pointer-events:none;opacity:.7;
+  background-image:
+   radial-gradient(1px 1px at 30px 60px,#fff,transparent),
+   radial-gradient(1px 1px at 120px 140px,rgba(255,255,255,.7),transparent),
+   radial-gradient(1px 1px at 210px 90px,rgba(255,255,255,.6),transparent),
+   radial-gradient(1px 1px at 250px 200px,#fff,transparent),
+   radial-gradient(1px 1px at 70px 240px,rgba(255,255,255,.5),transparent),
+   radial-gradient(1px 1px at 180px 300px,rgba(255,255,255,.6),transparent);
+  background-repeat:no-repeat}
+
+/* tabbar */
+.tabbar{position:absolute;left:10px;right:10px;bottom:10px;height:58px;display:flex;justify-content:space-around;align-items:center;
+  background:rgba(10,14,39,.72);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid var(--brd);border-radius:22px;z-index:15}
+.tab{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--faint);font-size:8.5px;font-weight:600}
+.tab svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.7}
+.tab.on{color:var(--teal1)}
+.tab.on svg{filter:drop-shadow(0 0 6px rgba(34,211,238,.8))}
+
+/* glass card */
+.card{background:var(--glass);border:1px solid var(--brd);border-radius:20px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;position:relative;z-index:2}
+.h .ttl{font-size:19px;font-weight:700;letter-spacing:-.01em}
+.h .sub{font-size:11px;color:var(--muted)}
+.eyebrow{font-size:9.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--teal1)}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 9px;border-radius:999px;font-size:9.5px;font-weight:600;
+  background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.3);color:var(--teal1)}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:12px;border-radius:15px;font-size:12.5px;font-weight:700;
+  background:linear-gradient(135deg,var(--ocean1),var(--teal0));color:#04122a;border:none;box-shadow:0 8px 24px -8px rgba(34,211,238,.7)}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--brd);box-shadow:none}
+.muted{color:var(--muted)} .faint{color:var(--faint)}
+.row{display:flex;gap:10px}
+.col{display:flex;flex-direction:column}
+.scr-h{display:flex;align-items:center;gap:10px;margin-bottom:16px;position:relative;z-index:2}
+.scr-h .back{width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid var(--brd);display:flex;align-items:center;justify-content:center}
+.scr-h .back svg{width:14px;height:14px;stroke:var(--text);fill:none;stroke-width:2}
+.scr-h h2{font-size:18px;font-weight:700}
+.content{position:relative;z-index:2;height:100%;overflow:hidden}
+
+/* orca + rings */
+.orca{fill:#0a1130;stroke:rgba(233,237,255,.85);stroke-width:1.2}
+.breath{position:relative;width:170px;height:170px;margin:6px auto 2px;display:grid;place-items:center}
+.ring{position:absolute;border-radius:50%}
+.ring.a{inset:0;background:conic-gradient(from 180deg,var(--teal1),var(--lav),var(--ocean1),var(--teal1));filter:blur(.5px);opacity:.9;
+  -webkit-mask:radial-gradient(circle, transparent 60%, #000 61%);mask:radial-gradient(circle, transparent 60%, #000 61%);animation:spin 9s linear infinite}
+.ring.b{inset:14px;background:radial-gradient(circle at 50% 35%, rgba(34,211,238,.25), rgba(10,14,39,.6) 70%);border:1px solid var(--brd)}
+.ring.glow{inset:-12px;background:radial-gradient(circle,rgba(34,211,238,.35),transparent 60%);filter:blur(10px);animation:pulse 4.5s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.08);opacity:1}}
+.breath .big{position:relative;z-index:2;text-align:center}
+.breath .big b{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.breath .big span{display:block;font-size:9.5px;color:var(--muted);letter-spacing:.18em;text-transform:uppercase;margin-top:2px}
+
+/* misc bits */
+.stat{flex:1;padding:13px 12px;border-radius:16px;background:var(--glass);border:1px solid var(--brd)}
+.stat .n{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.stat .n.mono{font-family:var(--mono)}
+.stat .l{font-size:9.5px;color:var(--muted);margin-top:2px}
+.bar{height:6px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--teal0),var(--lav))}
+.dot{width:7px;height:7px;border-radius:50%}
+.chip{padding:6px 11px;border-radius:999px;font-size:10.5px;font-weight:600;background:rgba(255,255,255,.06);border:1px solid var(--brd);color:var(--muted)}
+.chip.on{background:linear-gradient(135deg,rgba(37,99,235,.45),rgba(6,182,212,.35));color:var(--ice);border-color:rgba(34,211,238,.4)}
+.list{display:flex;flex-direction:column;gap:9px}
+.li{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:15px;background:var(--glass);border:1px solid var(--brd)}
+.ico{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,rgba(37,99,235,.4),rgba(6,182,212,.3));flex:none}
+.ico svg{width:17px;height:17px;stroke:var(--ice);fill:none;stroke-width:1.7}
+.li .t{font-size:12.5px;font-weight:600} .li .d{font-size:10px;color:var(--muted);margin-top:1px}
+.seg{display:flex;background:rgba(255,255,255,.05);border:1px solid var(--brd);border-radius:13px;padding:3px;gap:3px}
+.seg>div{flex:1;text-align:center;padding:7px;border-radius:10px;font-size:10.5px;font-weight:600;color:var(--muted)}
+.seg>div.on{background:rgba(34,211,238,.16);color:var(--teal1);box-shadow:inset 0 0 0 1px rgba(34,211,238,.3)}
+.bubble{max-width:78%;padding:10px 12px;border-radius:16px;font-size:11.5px;line-height:1.45}
+.bubble.ai{align-self:flex-start;background:var(--glass);border:1px solid var(--brd);border-bottom-left-radius:5px}
+.bubble.me{align-self:flex-end;background:linear-gradient(135deg,var(--ocean1),var(--teal0));color:#04122a;border-bottom-right-radius:5px;font-weight:500}
+.typing{display:flex;gap:4px;align-self:flex-start;padding:12px 14px;border-radius:16px;background:var(--glass);border:1px solid var(--brd)}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--teal1);opacity:.7;animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-2px)}}
+.field{display:flex;align-items:center;gap:8px;padding:8px 8px 8px 14px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid var(--brd)}
+.field .ph{flex:1;font-size:11.5px;color:var(--faint)}
+.send{width:32px;height:32px;border-radius:11px;background:linear-gradient(135deg,var(--ocean1),var(--teal0));display:grid;place-items:center;flex:none}
+.send svg{width:15px;height:15px;stroke:#04122a;fill:none;stroke-width:2}
+.rank{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:15px;background:var(--glass);border:1px solid var(--brd)}
+.rank .pos{width:22px;font-family:var(--mono);font-weight:700;font-size:13px;color:var(--muted);text-align:center}
+.rank.me{border-color:rgba(34,211,238,.45);background:rgba(34,211,238,.08)}
+.av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--lav),var(--teal0));flex:none;display:grid;place-items:center;font-size:11px;font-weight:700;color:#08122e}
+.toggle{width:40px;height:23px;border-radius:999px;background:linear-gradient(90deg,var(--ocean1),var(--teal0));position:relative;flex:none}
+.toggle.off{background:rgba(255,255,255,.12)}
+.toggle>i{position:absolute;top:2px;right:2px;width:19px;height:19px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.toggle.off>i{right:auto;left:2px}
+.waveform{display:flex;align-items:center;gap:2.5px;height:42px}
+.waveform i{flex:1;border-radius:2px;background:linear-gradient(180deg,var(--teal1),var(--ocean1));opacity:.85}
+.gauge{position:relative;width:150px;height:150px;margin:4px auto}
+.gauge svg{transform:rotate(-90deg)}
+.gauge .center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.gauge .center b{font-size:24px;font-weight:800;line-height:1}
+.gauge .center span{display:block;font-size:8px;color:var(--muted);letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+
+.logo-img{display:block;width:100%;height:100%;object-fit:cover}
+.logo-wrap{overflow:hidden;position:relative}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Orca · Интерфейс приложения</h1>
+  <svg width="0" height="0" style="position:absolute"><defs>
+    <symbol id="orca" viewBox="0 0 120 120">
+      <path class="orca" d="M60 14c-9 0-16 5-20 13-3-7-9-12-9-12s1 9 4 15c-9 6-15 17-15 30 0 22 18 38 40 38 6 0 11-1 16-3l16 9-4-17c7-7 11-16 11-27 0-26-18-46-39-46z"/>
+      <path d="M60 26c-6 0-11 4-13 10 8-2 17-2 25 1-2-7-6-11-12-11z" fill="rgba(233,237,255,.92)"/>
+      <circle cx="46" cy="52" r="3.4" fill="#E9EDFF"/>
+    </symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></symbol>
+    <symbol id="i-diary" viewBox="0 0 24 24"><path d="M6 4h12a1 1 0 011 1v15l-7-3-7 3V5a1 1 0 011-1z"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0114 0"/></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 1112 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 20a2 2 0 004 0"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 12h2l2-6 3 14 3-18 3 14 2-4h3"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-7-7 16-2-7-7-2z"/></symbol>
+    <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12 3c1 4-3 5-3 9a3 3 0 006 0c0-1 0-2-1-3 3 1 4 4 4 6a6 6 0 01-12 0c0-5 5-7 6-12z"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 5l12 7-12 7z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1 1M18 18l1 1M19 5l-1 1M6 18l-1 1"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M4 5a2 2 0 012-2h12v16H6a2 2 0 00-2 2z"/><path d="M18 19v2"/></symbol>
+    <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 01-10 0zM7 6H4v2a3 3 0 003 3M17 6h3v2a3 3 0 01-3 3M9 19h6M10 15h4l1 4H9z"/></symbol>
+  </defs></svg>
+
+  <div class="gallery">
+
+  <!-- 1 ONBOARDING -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="eyebrow">Шаг 9 из 9</div>
+      <h2 style="font-size:21px;font-weight:800;margin:8px 0 4px;letter-spacing:-.02em">Твой профиль готов</h2>
+      <p class="muted" style="font-size:11.5px;line-height:1.5;margin-bottom:14px">Мы рассчитали индексы по твоим ответам. Формулы прозрачные — их видно в настройках.</p>
+      <div class="breath"><div class="ring glow"></div><div class="ring a"></div><div class="ring b"></div>
+        <div class="logo-wrap" style="width:64px;height:64px;border-radius:18px;z-index:3"><img class="logo-img" src="orca_logo.jpeg" alt="Orca"></div>
+      </div>
+      <div class="row" style="margin-top:6px">
+        <div class="stat"><div class="n">72</div><div class="l">Индекс сна</div><div class="bar" style="margin-top:7px"><i style="width:72%"></i></div></div>
+        <div class="stat"><div class="n">41</div><div class="l">Стресс</div><div class="bar" style="margin-top:7px"><i style="width:41%"></i></div></div>
+        <div class="stat"><div class="n">58</div><div class="l">Фокус</div><div class="bar" style="margin-top:7px"><i style="width:58%"></i></div></div>
+      </div>
+      <button class="btn" style="margin-top:16px">Перейти в приложение</button>
+    </div></div>
+  </div><figcaption><b>Онбординг.</b> Расчёт индексов</figcaption></figure>
+
+  <!-- 2 HOME -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>22:30</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="h"><div><div class="eyebrow">Добрый вечер</div><div class="ttl">Фёдор</div></div>
+        <div class="logo-wrap" style="width:34px;height:34px;border-radius:10px"><img class="logo-img" src="orca_logo.jpeg" alt="Orca"></div></div>
+
+      <div class="card" style="padding:15px;position:relative;overflow:hidden">
+        <div style="position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(34,211,238,.25),transparent 65%)"></div>
+        <span class="pill"><span class="dot" style="background:var(--teal1)"></span>Фича-герой</span>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:12px">
+          <div style="position:relative;width:60px;height:60px;flex:none"><div class="ring a" style="inset:0"></div><div class="ring b" style="inset:9px"></div></div>
+          <div><div style="font-size:16px;font-weight:700">Анализ апноэ во сне</div><div class="muted" style="font-size:11px;margin-top:2px">Запиши дыхание — проверим паузы</div></div>
+        </div>
+        <button class="btn" style="margin-top:13px"><svg width="15" height="15" style="stroke:#04122a;fill:none;stroke-width:2"><use href="#i-mic"/></svg>Записать ночь</button>
+      </div>
+
+      <div class="row" style="margin-top:12px">
+        <div class="stat"><div class="n mono">72</div><div class="l">Сон за неделю</div></div>
+        <div class="stat"><div class="n mono">5</div><div class="l">Дней подряд</div></div>
+        <div class="stat"><div class="n mono">2.5ч</div><div class="l">Фокус</div></div>
+      </div>
+
+      <div class="li" style="margin-top:12px">
+        <div class="ico"><svg><use href="#i-moon"/></svg></div>
+        <div style="flex:1"><div class="t">Вечерняя рутина</div><div class="d">Night shift через 30 мин · звук · будильник 7:10</div></div>
+        <svg width="14" height="14" style="stroke:var(--faint);fill:none;stroke-width:2;transform:rotate(180deg)"><use href="#i-chev"/></svg>
+      </div>
+    </div></div>
+    <nav class="tabbar">
+      <div class="tab on"><svg><use href="#i-home"/></svg>Главная</div>
+      <div class="tab"><svg><use href="#i-moon"/></svg>Сон</div>
+      <div class="tab"><svg><use href="#i-diary"/></svg>Дневник</div>
+      <div class="tab"><span class="logo-wrap" style="width:20px;height:20px;border-radius:6px;display:block"><img class="logo-img" src="orca_logo.jpeg" alt="Orca"></span>Orca AI</div>
+      <div class="tab"><svg><use href="#i-user"/></svg>Профиль</div>
+    </nav>
+  </div><figcaption><b>Главный экран.</b> Апноэ вынесено наверх</figcaption></figure>
+
+  <!-- 3 APNEA -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>7:12</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="scr-h"><div class="back"><svg><use href="#i-chev"/></svg></div><h2>Анализ апноэ</h2></div>
+      <div class="card" style="padding:16px;text-align:center">
+        <div class="muted" style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase">Результат ночи · 6ч 48м</div>
+        <div class="breath" style="margin:12px auto 8px"><div class="ring glow"></div><div class="ring a"></div><div class="ring b"></div>
+          <div class="big" style="position:relative;z-index:3"><b style="color:var(--good);font-size:24px;line-height:1">Норма</b><span style="font-size:8.5px;letter-spacing:.14em">паузы не выявлены</span></div></div>
+        <div class="row" style="margin-top:4px">
+          <div class="stat"><div class="n mono">0.4</div><div class="l">событий/час</div></div>
+          <div class="stat"><div class="n mono">91%</div><div class="l">уверенность</div></div>
+        </div>
+      </div>
+      <div class="eyebrow" style="margin:16px 0 9px">История</div>
+      <div class="list">
+        <div class="li"><div class="dot" style="background:var(--good)"></div><div style="flex:1"><div class="t">Сегодня · норма</div><div class="d">0.4 события/час</div></div><div class="mono muted" style="font-size:11px">91%</div></div>
+        <div class="li"><div class="dot" style="background:var(--warn)"></div><div style="flex:1"><div class="t">Вчера · лёгкие признаки</div><div class="d">6.1 события/час</div></div><div class="mono muted" style="font-size:11px">63%</div></div>
+        <div class="li"><div class="dot" style="background:var(--good)"></div><div style="flex:1"><div class="t">2 дня назад · норма</div><div class="d">1.2 события/час</div></div><div class="mono muted" style="font-size:11px">78%</div></div>
+      </div>
+    </div></div>
+  </div><figcaption><b>Апноэ.</b> Результат и история</figcaption></figure>
+
+  <!-- 4 DIARY -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>21:05</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="h"><div class="ttl">Дневник</div><span class="pill">+ запись</span></div>
+      <div class="card" style="padding:14px">
+        <div class="muted" style="font-size:11px;margin-bottom:9px">Как настроение сегодня?</div>
+        <div class="row" style="justify-content:space-between;font-size:22px">
+          <span style="opacity:.4">😔</span><span style="opacity:.4">😕</span><span style="opacity:.4">😐</span>
+          <span style="filter:drop-shadow(0 0 8px rgba(34,211,238,.8))">🙂</span><span style="opacity:.4">😄</span>
+        </div>
+      </div>
+      <div class="eyebrow" style="margin:16px 0 9px">Неделя</div>
+      <div class="card" style="padding:14px 14px 16px">
+        <div style="display:flex;align-items:flex-end;justify-content:space-between;height:74px;gap:7px">
+          <i style="flex:1;height:48%;border-radius:5px;background:linear-gradient(180deg,var(--teal1),var(--ocean1))"></i>
+          <i style="flex:1;height:62%;border-radius:5px;background:linear-gradient(180deg,var(--teal1),var(--ocean1))"></i>
+          <i style="flex:1;height:40%;border-radius:5px;background:linear-gradient(180deg,var(--teal1),var(--ocean1))"></i>
+          <i style="flex:1;height:80%;border-radius:5px;background:linear-gradient(180deg,var(--teal1),var(--ocean1))"></i>
+          <i style="flex:1;height:55%;border-radius:5px;background:linear-gradient(180deg,var(--teal1),var(--ocean1))"></i>
+          <i style="flex:1;height:88%;border-radius:5px;background:linear-gradient(180deg,var(--lav),var(--teal0))"></i>
+          <i style="flex:1;height:70%;border-radius:5px;background:linear-gradient(180deg,var(--lav),var(--teal0))"></i>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:7px;font-size:8.5px;color:var(--faint)"><span>пн</span><span>вт</span><span>ср</span><span>чт</span><span>пт</span><span>сб</span><span>вс</span></div>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <div class="stat"><div class="n mono">4.1</div><div class="l">ср. настроение</div></div>
+        <div class="stat"><div class="n mono">2.3</div><div class="l">ср. стресс</div></div>
+        <div class="stat"><div class="n mono">7</div><div class="l">записей</div></div>
+      </div>
+    </div></div>
+    <nav class="tabbar">
+      <div class="tab"><svg><use href="#i-home"/></svg>Главная</div>
+      <div class="tab"><svg><use href="#i-moon"/></svg>Сон</div>
+      <div class="tab on"><svg><use href="#i-diary"/></svg>Дневник</div>
+      <div class="tab"><span class="logo-wrap" style="width:20px;height:20px;border-radius:6px;display:block"><img class="logo-img" src="orca_logo.jpeg" alt="Orca"></span>Orca AI</div>
+      <div class="tab"><svg><use href="#i-user"/></svg>Профиль</div>
+    </nav>
+  </div><figcaption><b>Дневник эмоций.</b> Ввод и недельная сводка</figcaption></figure>
+
+  <!-- 5 SOUNDS -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>23:18</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="scr-h"><div class="back"><svg><use href="#i-chev"/></svg></div><h2>Звуки для сна</h2></div>
+      <div class="card" style="padding:16px;text-align:center;position:relative;overflow:hidden">
+        <div style="position:absolute;inset:0;background:radial-gradient(220px 120px at 50% 0,rgba(6,182,212,.22),transparent 70%)"></div>
+        <div style="position:relative;z-index:2">
+          <div class="muted" style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase">Сейчас играет</div>
+          <div style="font-size:18px;font-weight:700;margin-top:6px">Океан</div>
+          <div class="waveform" style="margin:14px 6px 12px">
+            <i style="height:30%"></i><i style="height:55%"></i><i style="height:80%"></i><i style="height:45%"></i><i style="height:95%"></i><i style="height:60%"></i><i style="height:35%"></i><i style="height:70%"></i><i style="height:50%"></i><i style="height:85%"></i><i style="height:40%"></i><i style="height:65%"></i>
+          </div>
+          <div class="row" style="align-items:center;justify-content:center;gap:16px">
+            <div class="chip">−</div>
+            <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--ocean1),var(--teal0));display:grid;place-items:center"><svg width="18" height="18" style="color:#04122a"><use href="#i-play"/></svg></div>
+            <div class="chip">+</div>
+          </div>
+          <div class="pill" style="margin-top:13px">Таймер 30 мин · fade-out</div>
+        </div>
+      </div>
+      <div class="row" style="flex-wrap:wrap;gap:8px;margin-top:14px">
+        <div class="chip on">Океан</div><div class="chip">Дождь</div><div class="chip">Костёр</div><div class="chip">Белый шум</div><div class="chip">Розовый</div><div class="chip">Ночной гул</div>
+      </div>
+    </div></div>
+  </div><figcaption><b>Звуки.</b> Web Audio синтез + таймер</figcaption></figure>
+
+  <!-- 6 ALARM -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>23:40</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="scr-h"><div class="back"><svg><use href="#i-chev"/></svg></div><h2>Умный будильник</h2></div>
+      <div class="card" style="padding:18px;text-align:center">
+        <div class="muted" style="font-size:10.5px;letter-spacing:.16em;text-transform:uppercase">Окно пробуждения</div>
+        <div style="font-family:var(--mono);font-size:42px;font-weight:800;letter-spacing:-.02em;margin:8px 0;display:flex;align-items:center;justify-content:center;gap:8px;line-height:1"><span>6:45</span><span style="color:var(--faint);font-size:24px;line-height:1">–</span><span>7:10</span></div>
+        <p class="muted" style="font-size:11px;line-height:1.5">Разбудим в лёгкой фазе сна внутри окна — мягким нарастающим звуком</p>
+      </div>
+      <div class="card" style="padding:14px;margin-top:12px;display:flex;align-items:center;justify-content:space-between">
+        <div><div class="t" style="font-size:12.5px;font-weight:600">Окно</div><div class="d muted" style="font-size:10px">ширина пробуждения</div></div>
+        <div class="seg" style="width:150px"><div>15м</div><div class="on">25м</div><div>40м</div></div>
+      </div>
+      <div class="card" style="padding:14px;margin-top:10px;display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:11px"><div class="ico"><svg><use href="#i-wave"/></svg></div><div><div class="t" style="font-size:12.5px;font-weight:600">Нарастающий звук</div><div class="d muted" style="font-size:10px">плавный fade-in 90 сек</div></div></div>
+        <div class="toggle"><i></i></div>
+      </div>
+      <button class="btn" style="margin-top:14px"><svg width="15" height="15" style="stroke:#04122a;fill:none;stroke-width:2"><use href="#i-bell"/></svg>Будильник включён</button>
+    </div></div>
+  </div><figcaption><b>Будильник.</b> Окно пробуждения</figcaption></figure>
+
+  <!-- 7 EDUCATION -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>13:24</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="h"><div class="ttl">Наука о сне</div><span class="chip">10 карточек</span></div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:11px">
+        <div style="height:78px;background:linear-gradient(135deg,var(--ocean0),var(--teal0));position:relative"><div style="position:absolute;inset:0;background:radial-gradient(120px 60px at 80% 120%,rgba(255,255,255,.25),transparent)"></div></div>
+        <div style="padding:13px"><div class="eyebrow">Циркадные ритмы</div><div style="font-size:14px;font-weight:700;margin:4px 0 4px">Свет, экраны и мелатонин</div><div class="muted" style="font-size:10.5px;line-height:1.45">Вечерний свет подавляет мелатонин на ~55% и сдвигает часы назад</div></div>
+      </div>
+      <div class="list">
+        <div class="li"><div class="ico"><svg><use href="#i-moon"/></svg></div><div style="flex:1"><div class="t">Двухпроцессная модель сна</div><div class="d">давление сна + циркадные часы</div></div></div>
+        <div class="li"><div class="ico"><svg><use href="#i-bell"/></svg></div><div style="flex:1"><div class="t">Социальный джетлаг</div><div class="d">разрыв биологического и социального времени</div></div></div>
+        <div class="li"><div class="ico"><svg><use href="#i-wave"/></svg></div><div style="flex:1"><div class="t">Апноэ во сне</div><div class="d">паузы дыхания и их признаки</div></div></div>
+        <div class="li"><div class="ico"><svg><use href="#i-fire"/></svg></div><div style="flex:1"><div class="t">Состояние потока</div><div class="d">внимание и глубокое погружение</div></div></div>
+      </div>
+    </div></div>
+    <nav class="tabbar">
+      <div class="tab on"><svg><use href="#i-home"/></svg>Главная</div>
+      <div class="tab"><svg><use href="#i-moon"/></svg>Сон</div>
+      <div class="tab"><svg><use href="#i-diary"/></svg>Дневник</div>
+      <div class="tab"><span class="logo-wrap" style="width:20px;height:20px;border-radius:6px;display:block"><img class="logo-img" src="orca_logo.jpeg" alt="Orca"></span>Orca AI</div>
+      <div class="tab"><svg><use href="#i-user"/></svg>Профиль</div>
+    </nav>
+  </div><figcaption><b>Образование.</b> Научпоп-карточки</figcaption></figure>
+
+  <!-- 8 CHAT -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>0:12</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content" style="display:flex;flex-direction:column">
+      <div class="scr-h" style="margin-bottom:12px">
+        <div class="logo-wrap" style="width:32px;height:32px;border-radius:9px"><img class="logo-img" src="orca_logo.jpeg" alt="Orca"></div>
+        <div><h2 style="font-size:16px">Orca AI</h2><div class="faint" style="font-size:9.5px">отвечает по проверенным источникам</div></div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:9px;overflow:hidden">
+        <div class="bubble ai">Привет 👋 Я могу разобрать, почему тяжело засыпать. С чем помочь?</div>
+        <div class="bubble me">Кручу телефон в кровати и не могу уснуть</div>
+        <div class="bubble ai">Знакомо. Вечерний свет экрана подавляет мелатонин и сдвигает внутренние часы — заснуть труднее. Попробуй за час до сна включить вечернюю рутину: night shift + звук океана.</div>
+        <div class="typing"><i></i><i></i><i></i></div>
+      </div>
+      <div class="field" style="margin-top:10px"><div class="ph">Спроси Orca…</div><div class="send"><svg><use href="#i-send"/></svg></div></div>
+    </div></div>
+  </div><figcaption><b>Orca AI.</b> Чат с RAG по статьям</figcaption></figure>
+
+  <!-- 9 FOCUS -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>15:02</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content" style="text-align:center">
+      <div class="h"><div class="ttl">Фокус</div><span class="pill"><svg width="11" height="11" style="stroke:var(--teal1);fill:none;stroke-width:2"><use href="#i-fire"/></svg>4 дня</span></div>
+      <div class="gauge">
+        <svg width="150" height="150" viewBox="0 0 150 150">
+          <circle cx="75" cy="75" r="66" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
+          <circle cx="75" cy="75" r="66" fill="none" stroke="url(#fg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="414" stroke-dashoffset="150"/>
+          <defs><linearGradient id="fg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22D3EE"/><stop offset="1" stop-color="#818CF8"/></linearGradient></defs>
+        </svg>
+        <div class="center"><div style="position:relative;z-index:2"><b class="mono">17:48</b><span>осталось</span></div></div>
+      </div>
+      <div class="logo-wrap" style="margin:8px auto 0;width:50px;height:50px;border-radius:14px"><img class="logo-img" src="orca_logo.jpeg" alt="Orca"></div>
+      <div class="muted" style="font-size:11px;margin-top:6px">Косатка погружается, пока ты в фокусе</div>
+      <div class="seg" style="margin-top:16px"><div>25м</div><div class="on">50м</div><div>свой</div></div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn ghost" style="flex:1">Пауза</button>
+        <button class="btn" style="flex:1">Завершить</button>
+      </div>
+    </div></div>
+  </div><figcaption><b>Фокус-сессии.</b> Океанский таймер</figcaption></figure>
+
+  <!-- 10 LEADERBOARD -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>18:47</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="scr-h"><div style="width:30px;height:30px"><svg width="30" height="30" style="stroke:var(--teal1);fill:none;stroke-width:1.7"><use href="#i-trophy"/></svg></div><h2>Лидерборд</h2></div>
+      <p class="muted" style="font-size:10.5px;margin-bottom:14px">Очки = среднее качество сна за 7 дней</p>
+      <div class="list">
+        <div class="rank"><div class="pos" style="color:#FBBF24">1</div><div class="av">АК</div><div style="flex:1"><div class="t" style="font-size:12.5px;font-weight:600">Аня К.</div></div><div class="mono" style="font-weight:700">4.8</div></div>
+        <div class="rank"><div class="pos" style="color:#cbd5e1">2</div><div class="av">МР</div><div style="flex:1"><div class="t" style="font-size:12.5px;font-weight:600">Миша Р.</div></div><div class="mono" style="font-weight:700">4.6</div></div>
+        <div class="rank me"><div class="pos">3</div><div class="av">ФК</div><div style="flex:1"><div class="t" style="font-size:12.5px;font-weight:600">Фёдор · ты</div></div><div class="mono" style="font-weight:700;color:var(--teal1)">4.4</div></div>
+        <div class="rank"><div class="pos">4</div><div class="av">ВС</div><div style="flex:1"><div class="t" style="font-size:12.5px;font-weight:600">Вера С.</div></div><div class="mono" style="font-weight:700">4.1</div></div>
+        <div class="rank"><div class="pos">5</div><div class="av">ИЛ</div><div style="flex:1"><div class="t" style="font-size:12.5px;font-weight:600">Игорь Л.</div></div><div class="mono" style="font-weight:700">3.9</div></div>
+        <div class="rank"><div class="pos">6</div><div class="av">КД</div><div style="flex:1"><div class="t" style="font-size:12.5px;font-weight:600">Катя Д.</div></div><div class="mono" style="font-weight:700">3.7</div></div>
+      </div>
+    </div></div>
+  </div><figcaption><b>Лидерборд.</b> Telegram Mini App</figcaption></figure>
+
+  <!-- 11 PROFILE -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>9:41</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="h"><div class="ttl">Профиль</div></div>
+      <div class="card" style="padding:16px;display:flex;align-items:center;gap:13px">
+        <div class="av" style="width:46px;height:46px;font-size:16px">ФК</div>
+        <div><div style="font-size:16px;font-weight:700">Фёдор</div><div class="muted" style="font-size:10.5px">в Orca с марта · 24 ночи</div></div>
+      </div>
+      <div class="eyebrow" style="margin:16px 0 10px">Индексы</div>
+      <div class="col" style="gap:11px">
+        <div class="card" style="padding:13px 14px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;font-weight:600">Сон</span><span class="mono" style="font-weight:700;color:var(--teal1)">72</span></div><div class="bar"><i style="width:72%"></i></div></div>
+        <div class="card" style="padding:13px 14px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;font-weight:600">Стресс</span><span class="mono" style="font-weight:700;color:var(--warn)">41</span></div><div class="bar"><i style="width:41%;background:linear-gradient(90deg,var(--warn),var(--bad))"></i></div></div>
+        <div class="card" style="padding:13px 14px"><div style="display:flex;justify-content:space-between;margin-bottom:8px"><span style="font-size:12px;font-weight:600">Фокус</span><span class="mono" style="font-weight:700;color:var(--lav)">58</span></div><div class="bar"><i style="width:58%"></i></div></div>
+      </div>
+      <div class="li" style="margin-top:14px"><div class="ico"><svg><use href="#i-sun"/></svg></div><div style="flex:1"><div class="t">Как считаются индексы</div><div class="d">прозрачные формулы</div></div><svg width="13" height="13" style="stroke:var(--faint);fill:none;stroke-width:2;transform:rotate(180deg)"><use href="#i-chev"/></svg></div>
+    </div></div>
+    <nav class="tabbar">
+      <div class="tab"><svg><use href="#i-home"/></svg>Главная</div>
+      <div class="tab"><svg><use href="#i-moon"/></svg>Сон</div>
+      <div class="tab"><svg><use href="#i-diary"/></svg>Дневник</div>
+      <div class="tab"><span class="logo-wrap" style="width:20px;height:20px;border-radius:6px;display:block"><img class="logo-img" src="orca_logo.jpeg" alt="Orca"></span>Orca AI</div>
+      <div class="tab on"><svg><use href="#i-user"/></svg>Профиль</div>
+    </nav>
+  </div><figcaption><b>Профиль.</b> Индексы и настройки</figcaption></figure>
+
+  <!-- 12 ROUTINE -->
+  <figure><div class="phone">
+    <div class="island"></div>
+    <div class="sb"><span>22:55</span><span class="r"><svg viewBox="0 0 24 12"><path d="M2 8h2v3H2zM6 6h2v5H6zM10 4h2v7h-2zM14 2h2v9h-2z"/></svg><svg viewBox="0 0 26 12"><rect x="1" y="2" width="21" height="8" rx="2" fill="none" stroke="#E9EDFF"/><rect x="3" y="4" width="14" height="4" rx="1"/></svg></span></div>
+    <div class="screen"><div class="stars"></div><div class="content">
+      <div class="scr-h"><div class="back"><svg><use href="#i-chev"/></svg></div><h2>Вечерняя рутина</h2></div>
+      <div class="card" style="padding:15px;position:relative;overflow:hidden">
+        <div class="logo-wrap" style="position:absolute;right:-10px;bottom:-10px;width:90px;height:90px;opacity:.25;border-radius:24px"><img class="logo-img" src="orca_logo.jpeg" alt="Orca"></div>
+        <div class="eyebrow">через 35 минут</div>
+        <div style="font-size:16px;font-weight:700;margin-top:6px">Готовимся ко сну</div>
+        <div class="muted" style="font-size:11px;margin-top:4px;max-width:80%">Притушим экран, включим звук и зарядим будильник</div>
+      </div>
+      <div class="col" style="gap:10px;margin-top:13px">
+        <div class="card" style="padding:13px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:11px"><div class="ico"><svg><use href="#i-moon"/></svg></div><div><div class="t" style="font-size:12.5px;font-weight:600">Night shift</div><div class="d muted" style="font-size:10px">23:30 – 7:00</div></div></div><div class="toggle"><i></i></div></div>
+        <div class="card" style="padding:13px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:11px"><div class="ico"><svg><use href="#i-bell"/></svg></div><div><div class="t" style="font-size:12.5px;font-weight:600">Не беспокоить</div><div class="d muted" style="font-size:10px">внутри приложения</div></div></div><div class="toggle"><i></i></div></div>
+        <div class="card" style="padding:13px;display:flex;align-items:center;justify-content:space-between"><div style="display:flex;align-items:center;gap:11px"><div class="ico"><svg><use href="#i-sun"/></svg></div><div><div class="t" style="font-size:12.5px;font-weight:600">Системный Focus</div><div class="d muted" style="font-size:10px">открыть настройки iOS</div></div></div><div class="toggle off"><i></i></div></div>
+      </div>
+      <button class="btn" style="margin-top:14px">Запустить рутину</button>
+    </div></div>
+  </div><figcaption><b>Вечерняя рутина.</b> Night shift + DND</figcaption></figure>
+
+  </div>
+</div>
+</body>
+</html>

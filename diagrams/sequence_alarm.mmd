@@ -1,0 +1,18 @@
+sequenceDiagram
+    actor U as Пользователь
+    participant UI as Экран будильника
+    participant Sched as Планировщик
+    participant Motion as DeviceMotion
+    participant Audio as Web Audio API
+    participant Notif as Notification / LocalNotifications
+
+    U->>UI: задаёт целевое время и окно N минут
+    UI->>Sched: schedule(target, window)
+    Sched->>Motion: мониторинг движения (если доступно)
+    Motion-->>Sched: оценка лёгкой фазы сна
+    Sched->>Sched: вход в окно пробуждения
+    Sched->>Audio: старт нарастающего звука (fade-in)
+    Sched->>Notif: уведомление о пробуждении
+    Audio-->>U: мягкое пробуждение
+    U->>UI: dismiss
+    UI->>Sched: stop

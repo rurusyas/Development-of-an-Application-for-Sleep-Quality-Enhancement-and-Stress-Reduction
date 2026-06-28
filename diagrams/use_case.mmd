@@ -1,0 +1,52 @@
+flowchart LR
+    user(("Пользователь"))
+
+    subgraph profile["Профиль"]
+        uc_onboard["Онбординг и расчёт индексов"]
+        uc_settings["Настройки и DND"]
+    end
+    subgraph diary["Дневник"]
+        uc_diary_add["Быстрый ввод эмоции"]
+        uc_diary_week["Недельная сводка"]
+    end
+    subgraph sounds["Звуки"]
+        uc_sound_play["Звук для засыпания"]
+        uc_sound_timer["Таймер с fade-out"]
+    end
+    subgraph alarm["Будильник"]
+        uc_alarm_set["Окно пробуждения"]
+        uc_alarm_wake["Мягкое пробуждение"]
+    end
+    subgraph edu["Образование"]
+        uc_edu_read["Чтение карточек"]
+    end
+    subgraph routine["Вечерняя рутина"]
+        uc_nightshift["Night shift по расписанию"]
+        uc_focus_link["Диплинк на системный Focus"]
+    end
+    subgraph apnea["Апноэ"]
+        uc_apnea_30["30-сек запись в браузере"]
+        uc_apnea_night["Ночная запись в iOS"]
+        uc_apnea_hist["История результатов"]
+    end
+    subgraph chat["AI Chat"]
+        uc_chat["Диалог с Orca AI"]
+    end
+    subgraph focus["Фокус-сессии"]
+        uc_focus_run["Запуск таймера фокуса"]
+        uc_focus_stats["Статистика фокуса"]
+    end
+    subgraph board["Лидерборд"]
+        uc_board["Рейтинг в Telegram"]
+    end
+
+    user --> uc_onboard & uc_settings
+    user --> uc_diary_add & uc_diary_week
+    user --> uc_sound_play & uc_sound_timer
+    user --> uc_alarm_set & uc_alarm_wake
+    user --> uc_edu_read
+    user --> uc_nightshift & uc_focus_link
+    user --> uc_apnea_30 & uc_apnea_night & uc_apnea_hist
+    user --> uc_chat
+    user --> uc_focus_run & uc_focus_stats
+    user --> uc_board

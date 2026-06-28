@@ -1,0 +1,29 @@
+flowchart LR
+    subgraph clients["Клиенты"]
+        ios["iOS / Capacitor"]
+        web["Веб-демо"]
+        tma["Telegram Mini App"]
+        bot["Telegram-бот"]
+    end
+
+    subgraph backend["FastAPI бэкенд"]
+        api["REST API"]
+        apnea_svc["services/apnea.py"]
+        llm_svc["services/llm.py"]
+    end
+
+    db[("SQLite")]
+    model["apnea_model.predict"]
+    llmapi["LLM API (Anthropic / OpenAI)"]
+
+    ios -->|HTTPS REST| api
+    web -->|HTTPS REST| api
+    tma -->|HTTPS REST + initData| api
+    bot -->|HTTP| api
+
+    api --> db
+    api --> apnea_svc
+    api --> llm_svc
+    apnea_svc --> model
+    llm_svc -->|SSE| llmapi
+    llm_svc -.->|RAG: articles.json| api

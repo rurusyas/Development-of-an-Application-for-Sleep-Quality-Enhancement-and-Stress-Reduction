@@ -1,0 +1,20 @@
+flowchart TD
+    start(["Первое открытие"]) --> onboard["Онбординг: сон, стресс, концентрация"]
+    onboard --> indices["Расчёт индексов rule-based"]
+    indices --> home["Главный экран: апноэ-герой"]
+    home --> choose{"Что делает пользователь"}
+    choose -->|вечер| routine["Вечерняя рутина"]
+    routine --> nightshift["Night shift + DND"]
+    nightshift --> sounds["Звук для засыпания + таймер"]
+    sounds --> alarm_set["Ставит окно будильника"]
+    alarm_set --> sleep["Сон"]
+    choose -->|апноэ| apnea["Запись и анализ апноэ"]
+    apnea --> apnea_hist["Результат в историю"]
+    choose -->|день| focus["Фокус-сессия"]
+    focus --> focus_stat["Статистика фокуса"]
+    choose -->|рефлексия| diary["Дневник эмоций"]
+    diary --> week["Недельная сводка"]
+    choose -->|вопрос| chat["Orca AI"]
+    sleep --> morning["Срабатывание будильника в окне"]
+    morning --> summary["Утренняя сводка"]
+    summary --> diary

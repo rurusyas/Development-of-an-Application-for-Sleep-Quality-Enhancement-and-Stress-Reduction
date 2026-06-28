@@ -1,0 +1,10 @@
+stateDiagram-v2
+    [*] --> Idle
+    Idle --> Active: запуск таймера
+    Active --> Paused: пауза
+    Paused --> Active: продолжить
+    Active --> Completed: таймер истёк
+    Active --> Abandoned: выход до конца
+    Paused --> Abandoned: выход до конца
+    Completed --> [*]: запись в историю
+    Abandoned --> [*]

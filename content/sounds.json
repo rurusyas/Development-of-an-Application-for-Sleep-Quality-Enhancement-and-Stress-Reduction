@@ -1,0 +1,50 @@
+[
+  {
+    "id": "white-noise",
+    "title": "белый шум",
+    "type": "noise",
+    "params": { "color": "white", "filterHz": 0, "gain": 0.5 }
+  },
+  {
+    "id": "pink-noise",
+    "title": "розовый шум",
+    "type": "noise",
+    "params": { "color": "pink", "filterHz": 0, "gain": 0.6 }
+  },
+  {
+    "id": "brown-noise",
+    "title": "коричневый шум",
+    "type": "noise",
+    "params": { "color": "brown", "filterHz": 0, "gain": 0.7 }
+  },
+  {
+    "id": "ocean-waves",
+    "title": "океан",
+    "type": "wave",
+    "params": { "color": "brown", "lfoRateHz": 0.12, "lfoDepth": 0.6, "filterHz": 900, "gain": 0.7 }
+  },
+  {
+    "id": "rain",
+    "title": "дождь",
+    "type": "rain",
+    "params": { "color": "pink", "density": 0.85, "filterHz": 2200, "gain": 0.5 }
+  },
+  {
+    "id": "crackle",
+    "title": "костёр",
+    "type": "crackle",
+    "params": { "density": 0.4, "decay": 0.12, "filterHz": 1600, "gain": 0.5 }
+  },
+  {
+    "id": "night-drone",
+    "title": "ночной гул",
+    "type": "drone",
+    "params": { "baseHz": 110, "detuneHz": 0.6, "filterHz": 500, "gain": 0.35 }
+  },
+  {
+    "id": "fan",
+    "title": "вентилятор",
+    "type": "fan",
+    "params": { "color": "brown", "lfoRateHz": 0.8, "lfoDepth": 0.2, "filterHz": 700, "gain": 0.6 }
+  }
+]

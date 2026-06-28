@@ -1,0 +1,15 @@
+sequenceDiagram
+    actor U as Пользователь
+    participant UI as Экран дневника
+    participant Store as Zustand store
+    participant IDB as IndexedDB
+    participant API as FastAPI
+
+    U->>UI: вводит mood, energy, stress, sleep_quality
+    UI->>Store: addEntry(entry)
+    Store->>IDB: put(diary_entries)
+    Store->>Store: пересчёт недельных индексов
+    Store->>API: POST /diary
+    API-->>Store: 200 DiaryOut
+    Store-->>UI: обновлённая история + сводка
+    UI-->>U: показ недельной сводки

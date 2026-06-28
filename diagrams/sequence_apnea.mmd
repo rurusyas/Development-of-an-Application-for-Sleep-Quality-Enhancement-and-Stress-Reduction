@@ -1,0 +1,20 @@
+sequenceDiagram
+    actor U as Пользователь
+    participant UI as Экран апноэ
+    participant Rec as MediaRecorder / AVAudioSession
+    participant API as FastAPI
+    participant Svc as services/apnea.py
+    participant M as apnea_model.predict
+    participant IDB as IndexedDB
+
+    U->>UI: запускает запись
+    UI->>Rec: start()
+    Rec-->>UI: аудиофайл (wav/mp3)
+    UI->>API: POST /apnea/analyze (multipart)
+    API->>Svc: run_apnea(path)
+    Svc->>M: predict(audio_path)
+    M-->>Svc: (has_apnea, confidence)
+    Svc-->>API: (has_apnea, confidence, used_model)
+    API-->>UI: {has_apnea, confidence, mode}
+    UI->>IDB: put(apnea_results)
+    UI-->>U: результат + история

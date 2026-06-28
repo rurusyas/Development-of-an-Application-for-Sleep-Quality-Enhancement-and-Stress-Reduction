@@ -1,0 +1,78 @@
+erDiagram
+    users ||--o{ diary_entries : has
+    users ||--o{ sleep_sessions : has
+    users ||--o{ alarms : has
+    users ||--o{ sound_sessions : has
+    users ||--o{ article_views : has
+    users ||--o{ apnea_results : has
+    users ||--o{ focus_sessions : has
+    users ||--|| settings : has
+
+    users {
+        string id PK
+        string tg_id
+        string name
+        float sleep_index
+        float stress_index
+        float focus_index
+        number created_at
+    }
+    diary_entries {
+        string id PK
+        string user_id FK
+        number mood
+        number energy
+        number stress
+        number sleep_quality
+        string note
+        number created_at
+    }
+    sleep_sessions {
+        string id PK
+        string user_id FK
+        number start_at
+        number end_at
+        number quality
+    }
+    alarms {
+        string id PK
+        string user_id FK
+        number window_min
+        string target_time
+        boolean enabled
+    }
+    sound_sessions {
+        string id PK
+        string user_id FK
+        string sound_id
+        number duration_sec
+        number created_at
+    }
+    article_views {
+        string id PK
+        string user_id FK
+        string article_id
+        number viewed_at
+    }
+    apnea_results {
+        string id PK
+        string user_id FK
+        boolean has_apnea
+        float confidence
+        string mode
+        number created_at
+    }
+    focus_sessions {
+        string id PK
+        string user_id FK
+        number duration_min
+        boolean completed
+        number created_at
+    }
+    settings {
+        string user_id PK
+        boolean dnd_enabled
+        string nightshift_from
+        string nightshift_to
+        boolean haptics
+    }

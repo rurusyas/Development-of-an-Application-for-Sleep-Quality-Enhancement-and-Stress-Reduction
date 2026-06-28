@@ -1,0 +1,26 @@
+sequenceDiagram
+    actor U as Пользователь
+    participant UI as Экран Orca AI
+    participant API as FastAPI /chat
+    participant LLM as services/llm.py
+    participant Ext as LLM API (Anthropic / OpenAI)
+
+    U->>UI: вводит сообщение
+    UI->>UI: показ typing indicator
+    UI->>API: POST /chat {message, history}
+    API->>LLM: stream_chat(message, history)
+    alt ключ задан
+        LLM->>LLM: system prompt = articles.json (RAG)
+        LLM->>Ext: streaming request
+        loop токены
+            Ext-->>LLM: chunk
+            LLM-->>API: delta
+            API-->>UI: data: {delta} (SSE)
+            UI-->>U: дописывает ответ
+        end
+    else ключа нет
+        LLM-->>API: "Configure LLM_API_KEY..."
+        API-->>UI: data: {delta} (SSE)
+    end
+    API-->>UI: data: {done:true}
+    UI->>UI: скрыть typing indicator

@@ -1,0 +1,27 @@
+flowchart TD
+    main["main.tsx / main-demo.tsx / main-telegram.tsx"] --> app["App.tsx + React Router"]
+    app --> screens["src/screens/*"]
+    app --> nav["BottomNav"]
+
+    screens --> home["HomeScreen"]
+    screens --> diary["DiaryScreen"]
+    screens --> sounds["SoundsScreen"]
+    screens --> alarm["AlarmScreen"]
+    screens --> edu["EducationScreen"]
+    screens --> routine["RoutineScreen"]
+    screens --> apnea["ApneaScreen"]
+    screens --> chat["ChatScreen"]
+    screens --> focus["FocusScreen"]
+    screens --> board["LeaderboardScreen"]
+    screens --> profile["ProfileScreen"]
+
+    screens --> components["src/components/*"]
+    screens --> store["src/store (Zustand)"]
+    store --> db["src/lib/db.ts (idb-keyval)"]
+    store --> api["src/services/api.ts"]
+    api --> sse["src/lib/sse.ts"]
+    sounds --> sound["src/services/sound.ts (Web Audio)"]
+    alarm --> sound
+    apnea --> platform["src/lib/platform.ts (Capacitor)"]
+    edu --> content["src/content/articles.json"]
+    chat --> api

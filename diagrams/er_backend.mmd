@@ -1,0 +1,39 @@
+erDiagram
+    users ||--o{ diary_entries : has
+    users ||--o{ apnea_results : has
+    users ||--o{ focus_sessions : has
+
+    users {
+        int id PK
+        string tg_id
+        string name
+        float sleep_index
+        float stress_index
+        float focus_index
+        datetime created_at
+    }
+    diary_entries {
+        int id PK
+        int user_id FK
+        int mood
+        int energy
+        int stress
+        int sleep_quality
+        text note
+        datetime created_at
+    }
+    apnea_results {
+        int id PK
+        int user_id FK
+        boolean has_apnea
+        float confidence
+        string mode
+        datetime created_at
+    }
+    focus_sessions {
+        int id PK
+        int user_id FK
+        int duration_min
+        boolean completed
+        datetime created_at
+    }

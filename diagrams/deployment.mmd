@@ -1,0 +1,24 @@
+flowchart TB
+    subgraph dev["Локально (MacBook)"]
+        vite["Vite dev / Capacitor"]
+        xcode["Xcode (сборка iOS)"]
+    end
+    subgraph vercel["Vercel / Cloudflare Pages"]
+        webdemo["Веб-демо (build:demo)"]
+        tma["Telegram Mini App (build:telegram)"]
+    end
+    subgraph railway["Railway / fly.io"]
+        backend["FastAPI + SQLite (Dockerfile)"]
+        bot["Telegram-бот (Dockerfile)"]
+    end
+    appstore["App Store (iOS-сборка)"]
+    botfather["@BotFather"]
+
+    xcode --> appstore
+    vite --> webdemo
+    vite --> tma
+    tma -->|REST| backend
+    webdemo -->|REST| backend
+    appstore -->|REST| backend
+    bot -->|REST| backend
+    bot --- botfather
