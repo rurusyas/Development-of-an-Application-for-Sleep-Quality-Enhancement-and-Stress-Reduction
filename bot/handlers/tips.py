@@ -47,7 +47,7 @@ def _format_index(articles):
         lines.append(f"{emoji}  <b>{title}</b>")
         lines.append(f"{summary}")
         lines.append("")
-        buttons.append([InlineKeyboardButton(f"{emoji}  {a['title']}", callback_data=f"article_{a['id']}")])
+        buttons.append([InlineKeyboardButton(f"{a['title']}", callback_data=f"article_{a['id']}")])
 
     lines.append(
         "<blockquote expandable>"

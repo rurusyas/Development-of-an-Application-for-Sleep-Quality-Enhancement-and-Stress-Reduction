@@ -74,11 +74,11 @@ async def save_focus(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Pick a praise line proportional to duration
     if minutes >= 90:
-        nudge = "Это серьёзное погружение. Косатка одобряет."
+        nudge = "Это серьезное погружение. Косатка одобряет."
     elif minutes >= 50:
-        nudge = "Pomodoro-формат для тех, кто хочет глубоко."
+        nudge = "Pomodoro-формат для тех, кто хочет глубже."
     elif minutes >= 25:
-        nudge = "Классический интервал. Маленький, но честный."
+        nudge = "Классический интервал. Маленький, зато честный."
     else:
         nudge = "Лучше короткое, чем никакое."
 

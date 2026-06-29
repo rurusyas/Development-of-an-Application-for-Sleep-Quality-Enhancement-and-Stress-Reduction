@@ -44,9 +44,7 @@ async def apnea(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "дыхание и вернёт результат с уверенностью.\n\n"
         "<blockquote expandable>"
         "Полноценный ночной режим (запись всей ночью в фоне) доступен в "
-        "iOS-приложении Orca. В Telegram-боте — короткая проверка по присланному "
-        "аудио: удобно для дневной демонстрации фичи и для быстрой выборки.\n"
-        "Результат не диагноз — это сигнал «возможно, стоит обратиться к специалисту»."
+        "iOS-приложении Orca"
         "</blockquote>"
     )
     await update.message.reply_text(text, parse_mode="HTML")
